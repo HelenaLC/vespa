@@ -1,0 +1,34 @@
+Type: Package
+Package: vespa
+Version: 0.99.0
+Title: SRT data visualization
+Description: ...
+Authors@R: person(
+  "Helena L.", "Crowell", 
+  role = c("aut", "cre"), 
+  email = "helena@crowell.eu")
+Depends: R (>= 4.2)
+Imports:
+  BiocParallel,
+  ggplot2,
+  matrixStats,
+  S4Vectors,
+  spatstat.core,
+  spatstat.geom,
+  SpatialExperiment
+Suggests: 
+  BiocStyle,
+  knitr,  
+  rmarkdown,
+  testthat
+biocViews: 
+  Spatial,
+  GeneExpression,
+  Transcriptomics,
+  Visualization
+VignetteBuilder: knitr
+URL: https://github.com/HelenaLC/vispa
+BugReports: https://github.com/HelenaLC/vispa
+RoxygenNote: 7.2.0
+Encoding: UTF-8
+LazyData: true

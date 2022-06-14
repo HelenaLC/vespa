@@ -1,0 +1,59 @@
+---
+title: "Untitled"
+author:
+- name: Helena L Crowell
+  email: helena@crowell.eu
+  affiliation:
+  - Institute for Molecular Life Sciences, University of Zurich, Zurich, Switzerland
+  - Swiss Institute of Bioinformatics (SIB), Zurich, Switzerland
+package: "`r BiocStyle::pkg_ver('vespa')`"
+date: "`r format(Sys.Date(), '%B %d, %Y')`"
+output: 
+  BiocStyle::html_document
+vignette: >
+  %\VignettePackage{vespa}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteIndexEntry{"vespa"}
+  %\VignetteEngine{knitr::rmarkdown}
+abstract: > 
+  text.
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  message = FALSE, warning = FALSE,
+  cache = TRUE, autodep = TRUE, cache.lazy = FALSE)
+```
+
+```{r load-data}
+library(vespa)
+data(foo)
+```
+
+# Statistics
+
+## Point pattern analysis
+
+```{r}
+(res <- testQuadrat(foo, by = "subset"))
+```
+
+## Mark co-localization
+
+```{r}
+(res <- testColo(foo, by = "subset"))
+```
+
+# Visualization
+
+```{r fig.small = TRUE}
+foo$foo <- sample(c(FALSE, TRUE), ncol(foo), TRUE)
+plotXY(foo, color_by = "foo")
+plotXY(foo, color_by = "det")
+plotXY(foo, color_by = "subset", thm = "white")
+```
+
+
+```{r session-info}
+sessionInfo()
+```
