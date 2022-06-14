@@ -7,7 +7,7 @@ Authors@R: person(
   "Helena L.", "Crowell", 
   role = c("aut", "cre"), 
   email = "helena@crowell.eu")
-Depends: R (>= 4.2)
+Depends: R (>= 4.1)
 Imports:
   BiocParallel,
   ggplot2,
