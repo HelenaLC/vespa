@@ -31,11 +31,10 @@
         a <- as.matrix(a)
       i <- intersect(c(...), rownames(a))
       if (length(i) > 0)
-        a <- a[i, , drop = FALSE]
-      a <- t(a)
-    } else {
-      a <- matrix(0, ncol(x), 0)
+        a <- t(a[i, , drop = FALSE])
     }
+    if (!exists("a"))
+      a <- matrix(0, ncol(x), 0)
     x <- data.frame(
       colData(x), a,
       row.names = NULL,

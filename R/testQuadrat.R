@@ -69,6 +69,7 @@ testQuadrat <- \(x,
       observed = I(list(qt$observed)),
       residuals = I(list(qt$residuals)))
   })
-  res <- do.call(rbind, res)
+  rmv <- vapply(res, is.null, logical(1))
+  res <- do.call(rbind, res[!rmv])
   return(res)
 }
