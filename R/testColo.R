@@ -46,13 +46,18 @@ testColo <- \(x,
     i = idx[1, ], j = idx[2, ],
     \(i, j) {
       a <- lys[[i]]; b <- lys[[j]]
+      if (nrow(a) < 2 | 
+          nrow(b) < 2) 
+        return(NULL)
       m <- rbind(a[, xy], b[, xy])
       r <- colRanges(as.matrix(m))
       l <- r[, 1]; r <- r[, 2]
-      d1 <- c(kde(a, xmin = l, xmax = r, ...)$estimate)
-      d2 <- c(kde(b, xmin = l, xmax = r, ...)$estimate)
+      d1 <- c(kde(a, xmin = l, xmax = r)$estimate)
+      d2 <- c(kde(b, xmin = l, xmax = r)$estimate)
       corr <- cor(d1, d2, method = "pearson")
-      DataFrame(from = names(lys)[i], to = names(lys)[j], corr)
+      data.frame(from = names(lys)[i], to = names(lys)[j], corr)
     })
-  return(do.call(rbind, pcc))
+  rmv <- vapply(pcc, is.null, logical(1))
+  pcc <- do.call(rbind, pcc[!rmv])
+  return(pcc)
 }

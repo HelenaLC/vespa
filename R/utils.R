@@ -25,15 +25,15 @@
 #' @importFrom SummarizedExperiment assay colData
 .df <- \(x, assay = NULL, ...) {
   if (is(x, "SingleCellExperiment")) {
-    if (!is.null(assay)) {
+    a <- if (!is.null(assay)) {
       a <- assay(x, assay)
       if (!is.matrix(a))
         a <- as.matrix(a)
       i <- intersect(c(...), rownames(a))
-      if (length(i) > 0)
-        a <- t(a[i, , drop = FALSE])
+      a <- if (length(i) > 0) 
+        t(a[i, , drop = FALSE])
     }
-    if (!exists("a"))
+    if (is.null(a))
       a <- matrix(0, ncol(x), 0)
     x <- data.frame(
       colData(x), a,

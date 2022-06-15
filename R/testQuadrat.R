@@ -53,16 +53,16 @@ testQuadrat <- \(x,
       idx <- as.list(idx)
   }
   res <- by(df, idx, simplify = FALSE, \(.) {
-    if (nrow(.) < n) 
-      return(NULL)
-    x <- .[, xy[1]]
-    y <- .[, xy[2]]
+    if ((.n <- nrow(.)) < n) return(NULL)
+    x <- .[[xy[1]]]
+    y <- .[[xy[2]]]
     w <- owin(range(x), range(y))
     pp <- ppp(x, y, w)
     qt <- quadrat.test(pp)
     DataFrame(
       row.names = NULL, 
       .[1, by, drop = FALSE],
+      n = .n, 
       p.value = qt$p.value,
       statistic = qt$statistic,
       expected = qt$expected[1],
