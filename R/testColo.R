@@ -86,5 +86,5 @@ testColo <- \(x, by,
     rnm <- grep("group", names(pcc))
     names(pcc)[rnm] <- group
   }
-  head(pcc)
+  return(pcc)
 }
