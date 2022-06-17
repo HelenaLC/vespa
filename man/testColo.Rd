@@ -14,6 +14,17 @@ spatial (x- and y-)coordinates.}
 instance defining the parallel back-end to be used.}
 
 \item{...}{further arguments; passed to \code{\link[ks]{kde}}.}
+
+\item{by}{character string; 
+specifies the variable to test by for co-localization.}
+
+\item{group}{character vector; 
+optional additional variable(s) to group by, e.g., 
+in order to perform a series of independent tests.}
+
+\item{n}{scalar integer; 
+threshold on the number of cells above 
+which to consider a group for testing.}
 }
 \value{
 a \code{\link[S4Vectors]{DataFrame-class}} object.
@@ -26,7 +37,9 @@ a \code{\link[S4Vectors]{DataFrame-class}} object.
 }
 \examples{
 data(foo)
-testColo(foo, by = "subset", gridsize = c(5, 5))
+testColo(foo, 
+  by = "subset", 
+  gridsize = c(5, 5))
 
 }
 \author{

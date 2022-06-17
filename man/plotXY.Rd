@@ -32,6 +32,12 @@ Ignored unless \code{x} is a \code{SingleCellExperiment}.}
 \item{scale}{function; applied to variables specified by \code{color_by}.
 Should accept numeric values and return an equal-length numeric vector.}
 
+\item{scale_xy}{character string; 
+specifies whether to rescale coordinates, e.g., in order to make panels 
+comparable when variables to \code{facet_by} occupy different spatial 
+regions. If \code{TRUE} (the default), each group's coordinates are scaled 
+separately (retaining their original aspect ratio!); ignored if \code{facet_by = NULL}.}
+
 \item{thm}{character string; specifies the plot background.
 When \code{"white"}, a border will be added as well.}
 
@@ -75,8 +81,13 @@ plotXY(foo, color_by = "epi")
 # color by scaled expression values
 # highlighting epithelial cells
 plotXY(foo, 
-  color_by = c("AQP8", "EPCAM", "OLFM4"), 
+  color_by = c("AQP8", "EPCAM"), 
   scale = .scale01, highlight = "epi")
+  
+# demo of not/scaling xy-coordinates
+foo$foo <- foo$x > median(foo$x)
+plotXY(foo, facet_by = "foo", scale_xy = TRUE)
+plotXY(foo, facet_by = "foo", scale_xy = FALSE)
 
 }
 \author{

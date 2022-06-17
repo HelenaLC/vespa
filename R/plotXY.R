@@ -25,6 +25,11 @@
 #'   Ignored unless \code{x} is a \code{SingleCellExperiment}.
 #' @param scale function; applied to variables specified by \code{color_by}.
 #'   Should accept numeric values and return an equal-length numeric vector.
+#' @param scale_xy character string; 
+#'   specifies whether to rescale coordinates, e.g., in order to make panels 
+#'   comparable when variables to \code{facet_by} occupy different spatial 
+#'   regions. If \code{TRUE} (the default), each group's coordinates are scaled 
+#'   separately (retaining their original aspect ratio!); ignored if \code{facet_by = NULL}.
 #' @param thm character string; specifies the plot background.
 #'   When \code{"white"}, a border will be added as well.
 #' @param size,alpha scalar numeric; aesthetics passed to \code{geom_point}.
@@ -61,6 +66,11 @@
 #' plotXY(foo, 
 #'   color_by = c("AQP8", "EPCAM"), 
 #'   scale = .scale01, highlight = "epi")
+#'   
+#' # demo of not/scaling xy-coordinates
+#' foo$foo <- foo$x > median(foo$x)
+#' plotXY(foo, facet_by = "foo", scale_xy = TRUE)
+#' plotXY(foo, facet_by = "foo", scale_xy = FALSE)
 #'
 #' @author Helena L. Crowell
 #'
@@ -86,6 +96,7 @@ plotXY <- \(x,
   highlight = NULL,
   assay = "logcounts", 
   scale = NULL,
+  scale_xy = TRUE,
   size = 1, alpha = 1, 
   nrow = NULL, ncol = NULL,
   thm = c("black", "white"),
@@ -97,6 +108,8 @@ plotXY <- \(x,
   thm <- match.arg(thm)
   .check_assay(x, assay)
   .check_xy(x, xy)
+  
+  stopifnot(is.logical(scale_xy), length(scale_xy) == 1)
   
   if (length(color_by) > 1 && length(facet_by) > 1)
     stop("Can only 'facet_by' one when provided", 
@@ -184,17 +197,39 @@ plotXY <- \(x,
     color_by <- ".color_by"; scale_color_identity(NULL)
   })
   
+  if (!is.null(facet_by)) {
+    aes <- c(aes, 
+      if (length(facet_by) == 2) {
+        facet_grid(facet_by, switch = "y")
+      } else {
+        facet_wrap(facet_by, nrow = nrow, ncol = ncol) 
+      }
+    )
+    if (scale_xy) {
+      .scale01 <- \(.) {
+        . <- df[, xy]
+        . <- as.matrix(.)
+        r <- colRanges(.)
+        d <- colDiffs(r)
+        a <- d[1]/d[2]
+        #. <- t(t(.)-r[1, ])
+        . <- .-r[1, ]
+        colRanges(.)
+        (t(.) - r[1, ]) %>% as.matrix %>% t %>% colRanges()
+        . <- .-min(.)
+        . <- ./max(.)
+      }
+      idx <- split(seq(nrow(df)), df[, facet_by])
+      for (. in idx) df[., xy] <- apply(df[., xy], 2, .scale01)
+    }
+  }
+  
   ggplot(df, aes_string(xy[1], xy[2], 
     col = color_by, size = size_by)) +
     geom_point(
       shape = 16, alpha = alpha, 
       if (!is.null(size_by) && size_by != ".size_by") size = size) + 
     guides(size = "none") +
-    ( if (!is.null(facet_by)) {
-      if (length(facet_by) == 2) {
-        facet_grid(facet_by, switch = "y")
-      } else facet_wrap(facet_by, nrow = nrow, ncol = ncol) 
-    } ) +
     coord_fixed() + theme_void() + 
     aes + get(paste0(".thm_", thm)) +
     theme(strip.text = element_text(face = "bold"))
