@@ -207,20 +207,15 @@ plotXY <- \(x,
     )
     if (scale_xy) {
       .scale01 <- \(.) {
-        . <- df[, xy]
         . <- as.matrix(.)
-        r <- colRanges(.)
-        d <- colDiffs(r)
-        a <- d[1]/d[2]
-        #. <- t(t(.)-r[1, ])
-        . <- .-r[1, ]
-        colRanges(.)
-        (t(.) - r[1, ]) %>% as.matrix %>% t %>% colRanges()
-        . <- .-min(.)
-        . <- ./max(.)
+        # r <- colRanges(.)
+        # d <- colDiffs(r)
+        # a <- d[1]/d[2]
+        . <- sweep(., 2, colMins(.), "-")
+        . <- sweep(., 2, colMaxs(.), "/")
       }
-      idx <- split(seq(nrow(df)), df[, facet_by])
-      for (. in idx) df[., xy] <- apply(df[., xy], 2, .scale01)
+      idx <- split(seq(nrow(df)), df[facet_by])
+      for (. in idx) df[., xy] <- .scale01(df[., xy])
     }
   }
   

@@ -48,6 +48,9 @@ testColo <- \(x, by,
     is.numeric(n), length(n) == 1, round(n) == n)
   
   df <- .df(x)
+  if (is.factor(df[[by]]))
+    df[[by]] <- droplevels(df[[by]])
+  
   lys <- if (is.null(group)) {
     list(foo = df)
   } else {
@@ -55,6 +58,7 @@ testColo <- \(x, by,
     df$.group <- do.call(paste, args)
     split(df, df$.group)
   }
+  
   lys <- lapply(lys, \(.) split(.[, xy], .[[by]]))
   idx <- lapply(lys, \(.) combn(names(.), 2))
   
@@ -84,6 +88,7 @@ testColo <- \(x, by,
   rmv <- vapply(pcc, is.null, logical(1))
   pcc <- do.call(rbind, pcc[!rmv])
   rownames(pcc) <- NULL
+  
   if (!is.null(group)) {
     idx <- match(pcc$.group, df$.group)
     pcc <- cbind(df[idx, group], pcc)
