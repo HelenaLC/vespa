@@ -13,7 +13,7 @@
 #' @param group character vector; 
 #'   optional additional variable(s) to group by, e.g., 
 #'   in order to perform a series of independent tests.
-#' @param n scalar integer; 
+#' @param nc scalar integer; 
 #'   threshold on the number of cells above 
 #'   which to consider a group for testing.
 #'
@@ -23,7 +23,7 @@
 #'
 #' @examples
 #' data(foo)
-#' testColo(foo, 
+#' res <- testColo(foo, 
 #'   by = "subset", 
 #'   gridsize = c(5, 5))
 #' 
@@ -38,14 +38,14 @@ NULL
 
 testColo <- \(x, by, 
   group = NULL, 
-  xy = c("x", "y"), n = 20, 
+  xy = c("x", "y"), nc = 20, 
   BPPARAM = SerialParam(), ...)
 {
   # validity checks
   .check_xy(x, xy)
   stopifnot(
     is(BPPARAM, "BiocParallelParam"),
-    is.numeric(n), length(n) == 1, round(n) == n)
+    is.numeric(nc), length(nc) == 1, round(nc) == nc)
   
   df <- .df(x)
   if (is.factor(df[[by]]))
@@ -70,29 +70,37 @@ testColo <- \(x, by,
       i = idx[[g]][1, ], 
       j = idx[[g]][2, ],
       \(i, j) {
-        a <- lys[[g]][[i]]
-        b <- lys[[g]][[j]]
-        if (nrow(a) < n | nrow(b) < n) 
-          return(NULL)
-        m <- rbind(a[, xy], b[, xy])
-        r <- colRanges(as.matrix(m))
+        n <- nrow(a <- lys[[g]][[i]])
+        m <- nrow(b <- lys[[g]][[j]])
+        if (n < nc | m < nc) return(NULL)
+        c <- rbind(a[, xy], b[, xy])
+        r <- colRanges(as.matrix(c))
         l <- r[, 1]; r <- r[, 2]
         d1 <- c(kde(a, xmin = l, xmax = r, ...)$estimate)
         d2 <- c(kde(b, xmin = l, xmax = r, ...)$estimate)
         corr <- cor(d1, d2, method = "pearson")
-        data.frame(.group = g, from = i, to = j, corr)
+        data.frame(.group = g, i, j, corr, n, m)
       })
     rmv <- vapply(pcc, is.null, logical(1))
     pcc <- do.call(rbind, pcc[!rmv])
   })
   rmv <- vapply(pcc, is.null, logical(1))
   pcc <- do.call(rbind, pcc[!rmv])
-  rownames(pcc) <- NULL
   
   if (!is.null(group)) {
-    idx <- match(pcc$.group, df$.group)
-    pcc <- cbind(df[idx, group], pcc)
+    # add uniquely mappable metadata
+    ids <- unique(pcc$.group)
+    tmp <- vapply(ids, \(.) {
+      i <- !is.na(match(df$.group, .))
+      vapply(df[i, ], \(.) length(unique(.)) == 1, logical(1))
+    }, logical(ncol(df)))
+    j <- names(df)[rowSums(tmp) == length(ids)]
+    j <- setdiff(j, c(".group", group, by))
+    fd <- df[match(pcc$.group, df$.group), ]
+    pcc <- cbind(fd[group], pcc, fd[j])
+    # drop grouping column 
     pcc$.group <- NULL
   }
+  rownames(pcc) <- NULL
   return(pcc)
 }

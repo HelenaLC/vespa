@@ -22,7 +22,7 @@ specifies the variable to test by for co-localization.}
 optional additional variable(s) to group by, e.g., 
 in order to perform a series of independent tests.}
 
-\item{n}{scalar integer; 
+\item{nc}{scalar integer; 
 threshold on the number of cells above 
 which to consider a group for testing.}
 }
